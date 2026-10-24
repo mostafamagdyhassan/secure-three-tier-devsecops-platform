@@ -1,0 +1,146 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        skipDefaultCheckout(true)
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    environment {
+        PYTHON_VERSION = '3.12'
+        BACKEND_IMAGE = 'secure-three-tier-backend'
+        FRONTEND_IMAGE = 'secure-three-tier-frontend'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                sh 'git status --short'
+            }
+        }
+
+        stage('Validate Required Tools') {
+            steps {
+                sh '''
+                    set -eu
+                    python3 --version
+                    docker --version
+                    git --version
+                '''
+            }
+        }
+
+        stage('Backend Tests') {
+            steps {
+                sh '''
+                    set -eu
+                    python3 -m venv .venv-ci
+                    . .venv-ci/bin/activate
+                    python -m pip install --upgrade pip
+                    pip install -r app/backend/requirements.txt
+                    pytest -q app/backend/tests
+                '''
+            }
+            post {
+                always {
+                    sh 'rm -rf .venv-ci'
+                }
+            }
+        }
+
+        stage('Dependency Audit') {
+            steps {
+                sh '''
+                    set -eu
+                    python3 -m venv .venv-audit
+                    . .venv-audit/bin/activate
+                    pip install -r app/backend/requirements.txt pip-audit
+                    pip-audit -r app/backend/requirements.txt
+                '''
+            }
+            post {
+                always {
+                    sh 'rm -rf .venv-audit'
+                }
+            }
+        }
+
+        stage('Secret Scan') {
+            steps {
+                sh '''
+                    set -eu
+                    docker run --rm \
+                      -v "$WORKSPACE:/repo:ro" \
+                      zricethezav/gitleaks:latest \
+                      detect --source=/repo --no-git --redact
+                '''
+            }
+        }
+
+        stage('Terraform Security Scan') {
+            steps {
+                sh '''
+                    set -eu
+                    docker run --rm \
+                      -v "$WORKSPACE:/src:ro" \
+                      -w /src \
+                      bridgecrew/checkov:latest \
+                      -d infrastructure/terraform \
+                      --framework terraform \
+                      --quiet
+                '''
+            }
+        }
+
+        stage('Build Container Images') {
+            steps {
+                sh '''
+                    set -eu
+                    docker build \
+                      -t "$BACKEND_IMAGE:$BUILD_NUMBER" \
+                      -f app/backend/Dockerfile app/backend
+
+                    docker build \
+                      -t "$FRONTEND_IMAGE:$BUILD_NUMBER" \
+                      -f app/frontend/Dockerfile app/frontend
+                '''
+            }
+        }
+
+        stage('Container Vulnerability Scan') {
+            steps {
+                sh '''
+                    set -eu
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      aquasec/trivy:latest image \
+                      --exit-code 1 \
+                      --severity HIGH,CRITICAL \
+                      "$BACKEND_IMAGE:$BUILD_NUMBER"
+
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      aquasec/trivy:latest image \
+                      --exit-code 1 \
+                      --severity HIGH,CRITICAL \
+                      "$FRONTEND_IMAGE:$BUILD_NUMBER"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI checks passed and container images were built and scanned.'
+        }
+        failure {
+            echo 'Pipeline failed. Review the stage logs before proceeding.'
+        }
+        always {
+            echo 'Pipeline execution finished.'
+        }
+    }
+}
