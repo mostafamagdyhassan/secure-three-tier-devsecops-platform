@@ -1,0 +1,49 @@
+nameOverride: ""
+fullnameOverride: ""
+
+backend:
+  replicaCount: 2
+
+  image:
+    repository: YOUR_AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/secure-three-tier-backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    port: 8000
+
+  environment:
+    APP_ENV: production
+    APP_NAME: secure-three-tier-devsecops-platform
+
+  database:
+    secretName: secure-platform-secrets
+    secretKey: DATABASE_URL
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+frontend:
+  replicaCount: 2
+
+  image:
+    repository: YOUR_AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/secure-three-tier-frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    port: 80
+    targetPort: 8080
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
