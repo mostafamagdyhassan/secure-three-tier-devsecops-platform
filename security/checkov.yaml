@@ -1,0 +1,13 @@
+# Checkov configuration for Terraform and Kubernetes manifests.
+# Do not add broad skip rules without a documented justification.
+
+quiet: true
+compact: true
+soft-fail: false
+
+framework:
+  - terraform
+  - kubernetes
+
+download-external-modules: false
+evaluate-variables: true
