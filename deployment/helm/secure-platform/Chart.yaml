@@ -1,0 +1,6 @@
+apiVersion: v2
+name: secure-platform
+description: Secure three-tier DevSecOps platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
