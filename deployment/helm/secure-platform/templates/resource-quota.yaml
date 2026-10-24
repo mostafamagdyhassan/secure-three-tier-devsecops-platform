@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: secure-platform-quota
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  hard:
+    pods: "20"
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    services: "5"
+    secrets: "20"
+    configmaps: "20"
