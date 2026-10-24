@@ -1,0 +1,16 @@
+aws_region                = "eu-central-1"
+project_name              = "secure-three-tier-devsecops"
+environment               = "dev"
+vpc_cidr                  = "10.20.0.0/16"
+
+availability_zones        = ["eu-central-1a", "eu-central-1b"]
+public_subnet_cidrs       = ["10.20.1.0/24", "10.20.2.0/24"]
+private_subnet_cidrs      = ["10.20.11.0/24", "10.20.12.0/24"]
+database_subnet_cidrs     = ["10.20.21.0/24", "10.20.22.0/24"]
+
+allowed_ssh_cidr          = ""
+db_name                   = "devsecops_db"
+db_username               = "devsecops_app"
+db_instance_class         = "db.t3.micro"
+db_backup_retention_days  = 7
+eks_cluster_version       = "1.32"
