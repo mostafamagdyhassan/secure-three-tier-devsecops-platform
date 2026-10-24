@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A secure three-tier DevSecOps task management platform.">
+  <title>DevSecOps Task Platform</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <p class="eyebrow">AWS · DEVSECOPS · CLOUD NATIVE</p>
+      <h1>Secure Task Platform</h1>
+      <p class="subtitle">A three-tier application built with security and reliability in mind.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="status-panel" aria-live="polite">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="api-status">Checking API status...</span>
+    </section>
+
+    <section class="task-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">WORKSPACE</p>
+          <h2>Tasks</h2>
+        </div>
+        <span id="task-count" class="task-count">0 tasks</span>
+      </div>
+
+      <form id="task-form">
+        <label for="task-title">New task</label>
+        <div class="form-row">
+          <input
+            id="task-title"
+            name="title"
+            type="text"
+            maxlength="200"
+            placeholder="e.g. Add security scanning to Jenkins"
+            required
+          >
+          <button type="submit" id="add-button">Add task</button>
+        </div>
+      </form>
+
+      <p id="message" role="status" aria-live="polite"></p>
+      <ul id="task-list" class="task-list"></ul>
+    </section>
+
+    <footer>
+      <p>Portfolio project demonstrating CI/CD, automated security testing,
+        containerization, Kubernetes, monitoring, and recovery.</p>
+    </footer>
+  </main>
+</body>
+</html>
