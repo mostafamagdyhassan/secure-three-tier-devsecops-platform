@@ -1,0 +1,26 @@
+# Trivy configuration for repository and container security scans.
+# Keep scanner versions pinned in the CI pipeline.
+
+format: table
+exit-code: 1
+severity:
+  - HIGH
+  - CRITICAL
+
+scan:
+  scanners:
+    - vuln
+    - misconfig
+    - secret
+
+misconfiguration:
+  scanners:
+    - terraform
+    - dockerfile
+    - kubernetes
+
+secret:
+  config: ""
+
+vulnerability:
+  ignore-unfixed: true
